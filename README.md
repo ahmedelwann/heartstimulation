@@ -41,11 +41,21 @@ environment, so the project was verified locally only (see §7).
 | Chapter | What it does |
 | --- | --- |
 | **I. In situ** | The whole specimen, anterior view. Drag to orbit, scroll or pinch to zoom, right-drag or two-finger drag to pan. |
-| **II. Structura** | Every structure is selectable. Hover for a name, click to frame it and open its record. The index lists all 26. |
-| **III. Cyclus** | The myocardium opens. Scrub the cycle rail to hold any instant of systole or diastole; every system follows. Toggle cavities and the circulation. |
+| **II. Structura** | Every structure is selectable. Hover for a name, click to frame it and open its record. The index groups all 38. |
+| **III. Cyclus** | The myocardium opens. Scrub the cycle rail to hold any instant of systole or diastole; every system follows. Toggle cavities and the circulation, and enter a chamber. |
 | **IV. Rhythmus** | Ten rhythm states. Timing, contraction, flow gates, ECG and the panel text all change together. |
 | **V. Stimulatio** | Click ventricular myocardium to place a pacing electrode. The activation field is re-solved from that point; the complex widens and the axis rotates. |
 | **VI. Iter** | Follow one erythrocyte through the circuit. The camera travels inside the blood pool. |
+
+### Interior exploration
+
+Entering a chamber (from the Cyclus tools, a chamber's record, or the interior
+bar) moves the camera to the centroid of the modelled cavity and clamps the
+orbit distance to that cavity's radius, so the camera cannot tunnel through the
+myocardium. The muscle drops to 15% opacity with a low head-lamp, and the valve
+apparatus, chordae and papillary muscles are made solid. `←` / `→` move between
+the four chambers; `Esc` or *Leave* restores the exterior view and the previous
+camera.
 
 Secondary controls: ghost/transparency, labels, sound (synthesised valve
 closure, off by default), heart rate, and the imprint (sources, model boundary,
@@ -70,10 +80,21 @@ BodyParts3D 4.0 OBJ elements (per FMA concept)
 Output: `public/assets/anatomy.glb` + `public/assets/anatomy.json` (centres,
 radii, vessel centrelines).
 
-Twenty-six separately selectable structures: right and left atrium, right and
-left ventricle, four valves, four endocardial cavities, aorta, pulmonary trunk,
-right and left pulmonary artery, superior and inferior vena cava, four pulmonary
-veins, left and right coronary artery, coronary sinus, fibrous skeleton.
+**Thirty-eight separately selectable structures**: right and left atrium, right
+and left ventricle, four valves, four endocardial cavities, aorta, pulmonary
+trunk, right and left pulmonary artery, superior and inferior vena cava, four
+pulmonary veins, the left main / LAD / diagonal / circumflex / right / right
+marginal / posterior descending / posterior ventricular coronary arteries, the
+great, middle and small cardiac veins with the coronary sinus, four groups of
+papillary muscles, and the fibrous skeleton.
+
+Surface grooves are real topography, not painted lines: each chamber vertex is
+measured against the actual coronary and venous geometry and the wall is recessed
+up to 10 mm along the atrioventricular and both interventricular sulci, then
+tinted as the epicardial fat that fills them.
+
+`ANATOMY.md` is the audit: what is verified, what is simplified, and what is
+missing from the source dataset and therefore absent rather than faked.
 
 ## 5. The physiology model
 
@@ -200,6 +221,38 @@ values are model output, not measurements.
 **This is an educational instrument. It is not a medical device, it does not
 diagnose, and it must not be used for clinical decisions.**
 
+## 5.9 Rendering budget
+
+Measured in the running build at 1440×900 with all 38 structures loaded:
+
+| Metric | Value |
+| --- | --- |
+| Draw calls | 23 |
+| Triangles submitted | 161,720 |
+| Shader programs | 1 |
+| Textures | 0 |
+| Geometries | 23 |
+
+One program for every tissue mesh is deliberate: the shader carries surface,
+deformation and interface state, and per-mesh differences travel as uniforms, so
+switching modes or selecting a structure never triggers a recompile.
+
+Work done to remove the lag that was present in the previous build:
+
+- materials are **opaque** unless transparency is actually in use; previously all
+  26 meshes were in the transparent queue, paying sorting and blending every
+  frame for no visual gain;
+- `preserveDrawingBuffer` is off unless `?capture` is in the URL (it forces a
+  copy every frame);
+- hover raycasting is throttled to ~18 Hz instead of every pointer move;
+- no per-frame `innerHTML` rebuilds or `querySelectorAll` in the readout path;
+- geometry and materials are created once and never rebuilt on mode changes.
+
+Frame rate is not claimed. The sandbox used for verification renders through
+SwiftShader (software), where the measured rate is ~1 fps and says nothing about
+hardware. The draw-call and triangle counts above are the hardware-independent
+evidence that the scene is cheap.
+
 ## 6. Architecture
 
 ```
@@ -236,7 +289,10 @@ Performed against the running application in headless Chromium 131
 
 - Production build succeeds (`vite build`, 691 kB JS / 20 kB CSS).
 - Boot, asset load, intro reveal, auto-enter and skip.
-- All 26 structures selectable; panel opens with correct name for each.
+- All 38 structures selectable; panel opens with correct name for each.
+- Interior mode entered in all four chambers (camera 0.16 units from the cavity
+  centroid, orbit clamped), and exit restored fov 32 and min distance 0.35.
+- Groove topography visible in the running build along the LAD, RCA, LCx and PDA.
 - Isolate, enter-cavity, reset view, whole-heart return.
 - 14 projected labels.
 - All 6 chapters activate; tools render per chapter.

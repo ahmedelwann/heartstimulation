@@ -309,18 +309,60 @@
    "radius": 0.5328
   },
   {
-   "id": "lca",
-   "label": "Left coronary artery",
+   "id": "lmca",
+   "label": "Left main coronary artery",
    "group": "coronary",
-   "triangles": 25124,
+   "triangles": 12664,
    "vertices": 6381,
-   "maxR": 0.7448,
+   "maxR": 0.7449,
    "center": [
     0.372,
-    -0.1083,
+    -0.1082,
     0.1972
    ],
    "radius": 0.5758
+  },
+  {
+   "id": "lad",
+   "label": "Anterior interventricular artery",
+   "group": "coronary",
+   "triangles": 9443,
+   "vertices": 4756,
+   "maxR": 0.7449,
+   "center": [
+    0.3771,
+    -0.1304,
+    0.3167
+   ],
+   "radius": 0.5705
+  },
+  {
+   "id": "diagonal",
+   "label": "Diagonal branch",
+   "group": "coronary",
+   "triangles": 3984,
+   "vertices": 2010,
+   "maxR": 0.7449,
+   "center": [
+    0.4878,
+    -0.1746,
+    0.2661
+   ],
+   "radius": 0.3644
+  },
+  {
+   "id": "lcx",
+   "label": "Circumflex artery",
+   "group": "coronary",
+   "triangles": 3017,
+   "vertices": 1521,
+   "maxR": 0.7121,
+   "center": [
+    0.3756,
+    -0.0658,
+    -0.1619
+   ],
+   "radius": 0.528
   },
   {
    "id": "rca",
@@ -337,9 +379,93 @@
    "radius": 0.5952
   },
   {
+   "id": "rca_marginal",
+   "label": "Right marginal artery",
+   "group": "coronary",
+   "triangles": 1802,
+   "vertices": 911,
+   "maxR": 0.5958,
+   "center": [
+    -0.0848,
+    -0.2334,
+    0.4695
+   ],
+   "radius": 0.2997
+  },
+  {
+   "id": "pda",
+   "label": "Posterior interventricular artery",
+   "group": "coronary",
+   "triangles": 3518,
+   "vertices": 1777,
+   "maxR": 0.739,
+   "center": [
+    0.152,
+    -0.4858,
+    0.1376
+   ],
+   "radius": 0.386
+  },
+  {
+   "id": "posterolateral",
+   "label": "Posterior ventricular branch",
+   "group": "coronary",
+   "triangles": 3044,
+   "vertices": 1539,
+   "maxR": 0.7055,
+   "center": [
+    0.3344,
+    -0.4543,
+    -0.093
+   ],
+   "radius": 0.3949
+  },
+  {
+   "id": "great_cardiac_vein",
+   "label": "Great cardiac vein",
+   "group": "veins",
+   "triangles": 826,
+   "vertices": 415,
+   "maxR": 0.4773,
+   "center": [
+    0.2626,
+    0.1019,
+    -0.2078
+   ],
+   "radius": 0.3064
+  },
+  {
+   "id": "middle_cardiac_vein",
+   "label": "Middle cardiac vein",
+   "group": "veins",
+   "triangles": 4628,
+   "vertices": 2341,
+   "maxR": 0.7426,
+   "center": [
+    0.187,
+    -0.4826,
+    0.1415
+   ],
+   "radius": 0.5166
+  },
+  {
+   "id": "small_cardiac_vein",
+   "label": "Small cardiac vein",
+   "group": "veins",
+   "triangles": 1462,
+   "vertices": 735,
+   "maxR": 0.5379,
+   "center": [
+    -0.2886,
+    -0.2401,
+    0.1878
+   ],
+   "radius": 0.4134
+  },
+  {
    "id": "coronary_sinus",
    "label": "Coronary sinus",
-   "group": "coronary",
+   "group": "veins",
    "triangles": 624,
    "vertices": 314,
    "maxR": 0.4826,
@@ -351,18 +477,60 @@
    "radius": 0.3409
   },
   {
-   "id": "fibrous_skeleton",
-   "label": "Fibrous skeleton",
-   "group": "conduction",
-   "triangles": 8786,
-   "vertices": 4376,
-   "maxR": 0.3548,
+   "id": "pm_rv_ant",
+   "label": "Anterior papillary muscle (right)",
+   "group": "internal",
+   "triangles": 882,
+   "vertices": 443,
+   "maxR": 0.6373,
    "center": [
-    0.0941,
-    -0.0624,
-    -0.0871
+    0.0871,
+    -0.3226,
+    0.3914
    ],
-   "radius": 0.3358
+   "radius": 0.202
+  },
+  {
+   "id": "pm_rv_post",
+   "label": "Posterior papillary muscle (right)",
+   "group": "internal",
+   "triangles": 692,
+   "vertices": 348,
+   "maxR": 0.5818,
+   "center": [
+    0.0099,
+    -0.4274,
+    0.2238
+   ],
+   "radius": 0.1747
+  },
+  {
+   "id": "pm_rv_septal",
+   "label": "Septal papillary muscle (right)",
+   "group": "internal",
+   "triangles": 844,
+   "vertices": 424,
+   "maxR": 0.2442,
+   "center": [
+    0.0172,
+    -0.0312,
+    0.1311
+   ],
+   "radius": 0.1585
+  },
+  {
+   "id": "pm_lv",
+   "label": "Papillary muscles (left)",
+   "group": "internal",
+   "triangles": 1596,
+   "vertices": 804,
+   "maxR": 0.6604,
+   "center": [
+    0.3333,
+    -0.2409,
+    0.1242
+   ],
+   "radius": 0.3147
   }
  ],
  "scale": 1,
@@ -1102,5 +1270,5 @@
    ]
   ]
  },
- "bytes": 2359300
+ "bytes": 3057052
 }

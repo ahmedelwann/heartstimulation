@@ -27,13 +27,22 @@ order:
 7. conversion to a single binary glTF (GLB) with one mesh per structure, no
    textures, no normals (computed at load);
 8. derivation of vessel centrelines by Dijkstra geodesic walk, stored in
-   `anatomy.json`.
+   `anatomy.json`;
+9. per-vertex sulcus mask: each chamber vertex is measured against the vertices
+   of the coronary and cardiac-vein meshes, and a smooth 0–1 mask is baked as the
+   `aGroove` attribute (used by the shader to recess the wall and tint
+   epicardial fat);
+10. trimming of coronary/venous triangles that sit more than 12.6 mm from the
+    epicardium.
 
-Structures included: right and left atrium, right and left ventricle, tricuspid,
-mitral, aortic and pulmonary valves, four endocardial cavities, aorta, pulmonary
-trunk, right and left pulmonary artery, superior and inferior vena cava, four
-pulmonary veins, left and right coronary artery, coronary sinus, fibrous
-skeleton (26 meshes).
+Structures included (38 meshes): right and left atrium, right and left ventricle,
+tricuspid, mitral, aortic and pulmonary valves, four endocardial cavities, aorta,
+pulmonary trunk, right and left pulmonary artery, superior and inferior vena
+cava, four pulmonary veins, left main / anterior interventricular / diagonal /
+circumflex / right / right marginal / posterior descending / posterior
+ventricular coronary arteries, great / middle / small cardiac veins and the
+coronary sinus, four papillary muscle groups (right anterior, right posterior,
+right septal, left), and the fibrous skeleton.
 
 ### Properties of the source that affect interpretation
 

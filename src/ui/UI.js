@@ -101,6 +101,12 @@ export class UI {
           <button class="tool-btn" id="t-cav" aria-pressed="false">Cavities</button>
           <button class="tool-btn" id="t-flow" aria-pressed="${this.app.flowOn}">Flow</button>
         </div>
+        <div class="tool-group"><span class="tool-label">Inside</span>
+          <button class="tool-btn" id="t-in-ra">RA</button>
+          <button class="tool-btn" id="t-in-rv">RV</button>
+          <button class="tool-btn" id="t-in-la">LA</button>
+          <button class="tool-btn" id="t-in-lv">LV</button>
+        </div>
         <div class="tool-note">Scrub the cycle below to hold any instant of systole or diastole.</div>`;
       t.querySelector('#t-ghost').addEventListener('click', (e) => {
         const on = e.currentTarget.getAttribute('aria-pressed') !== 'true';
@@ -117,6 +123,9 @@ export class UI {
         e.currentTarget.setAttribute('aria-pressed', String(on));
         this.app.setFlow(on);
       });
+      for (const ch of ['ra', 'rv', 'la', 'lv']) {
+        t.querySelector('#t-in-' + ch).addEventListener('click', () => this.app.enterCavity(ch));
+      }
     } else if (this.mode === 'rhythmus') {
       const list = RHYTHMS.map(
         (r) => `<button class="tool-btn r-btn" data-r="${r.id}" aria-pressed="${this.app.engine.rhythm.id === r.id}">${r.name}</button>`,
@@ -439,6 +448,33 @@ export class UI {
         <div class="sr-block"><span class="sr-v">${Math.round(s.axis)}<small>°</small></span><span class="sr-l">frontal axis</span></div>`;
     }
     this.updateLabels();
+  }
+
+  showInteriorBar(active) {
+    if (!this.el.interior) {
+      const d = document.createElement('div');
+      d.id = 'interior-bar';
+      d.innerHTML = `
+        <span class="ib-label">Inside</span>
+        ${[['ra', 'Right atrium'], ['rv', 'Right ventricle'], ['la', 'Left atrium'], ['lv', 'Left ventricle']]
+          .map(([id, n]) => `<button class="ib-btn" data-ch="${id}">${n}</button>`).join('')}
+        <button class="ib-btn ib-exit" data-ch="exit">Leave</button>`;
+      document.getElementById('app').appendChild(d);
+      d.querySelectorAll('.ib-btn').forEach((b) => b.addEventListener('click', () => {
+        if (b.dataset.ch === 'exit') this.app.exitInterior();
+        else this.app.enterCavity(b.dataset.ch);
+      }));
+      this.el.interior = d;
+    }
+    this.el.interior.classList.toggle('on', !!active);
+    if (active) this.setInteriorActive(active);
+  }
+
+  setInteriorActive(id) {
+    if (!this.el.interior) return;
+    this.el.interior.querySelectorAll('[data-ch]').forEach((b) => {
+      b.classList.toggle('on', b.dataset.ch === id);
+    });
   }
 
   showStimReadout(on) {

@@ -19,7 +19,7 @@ export class Stage {
       alpha: false,
       powerPreference: 'high-performance',
       stencil: false,
-      preserveDrawingBuffer: true,
+      preserveDrawingBuffer: new URLSearchParams(location.search).has('capture'),
     });
     this.renderer.setPixelRatio(Math.min(this.dprCap, this.quality === 'high' ? 2 : 1.5));
     this.renderer.outputColorSpace = THREE.SRGBColorSpace;

@@ -58,6 +58,7 @@ class App {
     this.setLoad(0.86, 'Building circulation');
     await raf();
     this.flow = new Flow(this.stage, this.anatomy).build(this.anatomy.meta, this.stage.quality);
+    this.flow.setVisible(false);
     this.ecg = new Ecg($('ecg'), this.engine);
     this.ui = new UI(this);
 
@@ -286,21 +287,76 @@ class App {
     this.anatomy.setVisible(id, true);
   }
 
+  /**
+   * Interior exploration. The camera is placed at the centroid of the modelled
+   * cavity (not at the centroid of its bounding box), the muscle is opened to
+   * 15% so the wall reads from the inside, and the orbit distance is clamped to
+   * the cavity radius so the camera cannot tunnel through the myocardium.
+   */
   enterCavity(id) {
-    const cav = { lv: 'cav_lv', rv: 'cav_rv', la: 'cav_la', ra: 'cav_ra' }[id];
+    if (!['lv', 'rv', 'la', 'ra'].includes(id)) return;
+    const wasInterior = this.interior;
+    this.interior = id;
+    this.savedExterior ||= {
+      pos: this.stage.camera.position.clone(),
+      target: this.stage.controls.target.clone(),
+    };
     this.setGhost(true);
     this.setCavities(true);
-    this.anatomy.isolateStructure(id);
-    const s = this.anatomy.get(cav || id);
-    if (s) {
-      const dir = s.center.clone();
-      if (dir.length() < 0.04) dir.set(0.3, 0, 0.6);
-      dir.normalize();
-      this.stage.frame(s.center.toArray(), Math.max(0.1, s.radius * 0.6), { padding: 1.7, duration: 1200, direction: dir.toArray() });
+    this.anatomy.setInternalVisibility(true);
+    this.anatomy.setVesselVisibility(false);
+    this.anatomy.isolateStructure(null);
+    if (!wasInterior) {
+      this.stage.camera.near = 0.004;
+      this.stage.camera.fov = 62;
+      this.stage.camera.updateProjectionMatrix();
+      this.stage.controls.minDistance = 0.012;
+      this.stage.controls.rotateSpeed = 0.34;
     }
-    this.anatomy.select(cav || id);
-    this.ui.openStructure(id);
-    this.ui.toast('Muscle is now dithered — the cavities are modelled surfaces, not painted');
+    this.flow.setVisible(false);
+    this.anatomy.setHeadlamp(0.16);
+    this.focusInterior(id);
+    this.anatomy.select(null);
+    this.ui.closePanel();
+    this.ui.showInteriorBar(id);
+    this.ui.toast('Inside the chamber — orbit to look around, ← → for chambers, Esc to leave');
+  }
+
+  focusInterior(id) {
+    const cav = this.anatomy.get('cav_' + id) || this.anatomy.get(id);
+    if (!cav) return;
+    const chamber = this.anatomy.get(id);
+    const centre = cav.center.clone();
+    const radius = Math.max(0.05, Math.min(cav.radius * 0.55, 0.16));
+    const dir = new THREE.Vector3(
+      Math.sin(this.stage.controls.getAzimuthalAngle()) || 0.34,
+      0.18,
+      Math.cos(this.stage.controls.getAzimuthalAngle()) || 0.94,
+    ).normalize();
+    const pos = centre.clone().addScaledVector(dir, radius);
+    this.stage.animateCamera(pos, centre, 900);
+    this.stage.controls.maxDistance = radius * 2.4;
+    this.interiorChamber = id;
+    this.ui.setInteriorActive(id);
+  }
+
+  exitInterior() {
+    if (!this.interior) return;
+    this.interior = null;
+    this.interiorChamber = null;
+    this.anatomy.setInternalVisibility(false);
+    this.anatomy.setVesselVisibility(true);
+    this.anatomy.setHeadlamp(0);
+    this.setCavities(false);
+    this.setGhost(false);
+    this.stage.camera.near = 0.02;
+    this.stage.camera.fov = 32;
+    this.stage.camera.updateProjectionMatrix();
+    this.stage.controls.minDistance = 0.35;
+    this.stage.controls.maxDistance = 4.6;
+    this.stage.controls.rotateSpeed = 0.62;
+    this.ui.showInteriorBar(null);
+    if (this.savedExterior) this.stage.animateCamera(this.savedExterior.pos, this.savedExterior.target, 950);
   }
 
   resetView() {
@@ -488,9 +544,13 @@ class App {
       this.dragged = false;
       c.style.cursor = 'grabbing';
     });
+    let lastHover = 0;
     c.addEventListener('pointermove', (e) => {
       if (Math.abs(e.clientX - downX) + Math.abs(e.clientY - downY) > 6) this.dragged = true;
       if (e.buttons) return;
+      const now = performance.now();
+      if (now - lastHover < 55) return;      // raycasting every mousemove is wasted work
+      lastHover = now;
       this.hoverAt(e);
     });
     c.addEventListener('pointerup', (e) => {
@@ -509,8 +569,17 @@ class App {
 
     window.addEventListener('keydown', (e) => {
       if (e.target instanceof HTMLInputElement) return;
+      if (this.interior && (e.key === 'ArrowLeft' || e.key === 'ArrowRight')) {
+        const order = ['ra', 'rv', 'la', 'lv'];
+        const i = order.indexOf(this.interiorChamber);
+        const next = order[(i + (e.key === 'ArrowRight' ? 1 : order.length - 1)) % order.length];
+        this.focusInterior(next);
+        e.preventDefault();
+        return;
+      }
       if (e.key === 'Escape') {
         if (!this.ui.el.imprint.hidden) { this.ui.el.imprint.hidden = true; return; }
+        if (this.interior) { this.exitInterior(); return; }
         if (this.mode === 'iter') this.stopJourney(); else this.clearSelection();
       }
       if (e.key === 'r' || e.key === 'R') this.resetView();

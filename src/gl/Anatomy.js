@@ -12,10 +12,14 @@ const GROUP_OF = {
   lca: 'coronary', rca: 'coronary', coronary_sinus: 'coronary',
   fibrous_skeleton: 'conduction',
   epicardium: 'shell',
+  lmca: 'coronary', lad: 'coronary', diagonal: 'coronary', lcx: 'coronary',
+  rca: 'coronary', rca_marginal: 'coronary', pda: 'coronary', posterolateral: 'coronary',
+  great_cardiac_vein: 'veins', middle_cardiac_vein: 'veins', small_cardiac_vein: 'veins',
+  pm_rv_ant: 'internal', pm_rv_post: 'internal', pm_rv_septal: 'internal', pm_lv: 'internal',
 };
 
 // Chamber-specific contractile amplitude (model units; heart height = 1.0).
-const AMP = { lv: 0.048, rv: 0.038, la: 0.013, ra: 0.013, cav_lv: 0.046, cav_rv: 0.036, cav_la: 0.012, cav_ra: 0.012 };
+const AMP = { lv: 0.048, rv: 0.038, la: 0.013, ra: 0.013, cav_lv: 0.046, cav_rv: 0.036, cav_la: 0.012, cav_ra: 0.012, pm_lv: 0.040, pm_rv_ant: 0.030, pm_rv_post: 0.030, pm_rv_septal: 0.030 };
 
 export class Anatomy {
   constructor(stage) {
@@ -95,8 +99,9 @@ export class Anatomy {
         dissolveR: 0,
       });
       // atrial vs ventricular clock selection
+      const isInternal = group === 'internal';
       mat.uniforms.uRegion.value = group === 'atria' || id.startsWith('cav_ra') || id.startsWith('cav_la') ? 0
-        : (isVentricle || id.startsWith('cav_') ? 1 : (group === 'valves' ? 3 : 4));
+        : (isVentricle || isInternal || id.startsWith('cav_') ? 1 : (group === 'valves' ? 3 : 4));
 
       const mesh = new THREE.Mesh(geo, mat);
       mesh.name = id;
@@ -113,13 +118,20 @@ export class Anatomy {
       };
       this.structures.set(id, st);
       if (group !== 'cavities') this.pickables.push(mesh);
-      if (group === 'cavities' || group === 'valves' || id === 'fibrous_skeleton') this.setVisible(id, false);
+      if (group === 'cavities' || group === 'valves' || group === 'internal' || id === 'fibrous_skeleton' || group === 'veins') this.setVisible(id, false);
     });
 
-    // Coronary arteries lie on the moving wall. Give every coronary vertex the
-    // activation time of its nearest ventricular vertex so the vessels travel
-    // with the myocardium instead of being left behind by systole.
+    // Structures that ride on the moving ventricular wall (coronaries, cardiac
+    // veins, papillary muscles) borrow the activation time of their nearest
+    // myocardial vertex, so they travel with the muscle instead of being left
+    // behind by systole.
     {
+      const riders = {
+        lmca: 0.026, lad: 0.024, diagonal: 0.022, lcx: 0.024, rca: 0.026,
+        rca_marginal: 0.022, pda: 0.022, posterolateral: 0.022, coronary_sinus: 0.020,
+        great_cardiac_vein: 0.020, middle_cardiac_vein: 0.020, small_cardiac_vein: 0.018,
+        pm_rv_ant: 0.036, pm_rv_post: 0.034, pm_rv_septal: 0.032, pm_lv: 0.042,
+      };
       const cell = 0.03;
       const key = (x, y, z) => `${Math.floor(x / cell)},${Math.floor(y / cell)},${Math.floor(z / cell)}`;
       const grid = new Map();
@@ -129,12 +141,12 @@ export class Anatomy {
         const arr = st.mesh.geometry.attributes.position.array;
         for (let i = 0; i < arr.length / 3; i++) {
           const k = key(arr[i * 3], arr[i * 3 + 1], arr[i * 3 + 2]);
-          let a = grid.get(k);
-          if (!a) { a = []; grid.set(k, a); }
-          a.push(arr[i * 3], arr[i * 3 + 1], arr[i * 3 + 2], id === 'rv' ? 1 : 0, i);
+          let a2 = grid.get(k);
+          if (!a2) { a2 = []; grid.set(k, a2); }
+          a2.push(arr[i * 3], arr[i * 3 + 1], arr[i * 3 + 2], id === 'rv' ? 1 : 0, i);
         }
       }
-      for (const id of ['lca', 'rca', 'coronary_sinus']) {
+      for (const [id, amp] of Object.entries(riders)) {
         const st = this.structures.get(id);
         if (!st) continue;
         const pos = st.mesh.geometry.attributes.position;
@@ -143,18 +155,18 @@ export class Anatomy {
           const x = pos.getX(i), y = pos.getY(i), z = pos.getZ(i);
           let bd = Infinity, bidx = -1, brv = 0;
           for (let dx = -1; dx <= 1; dx++) for (let dy = -1; dy <= 1; dy++) for (let dz = -1; dz <= 1; dz++) {
-            const a = grid.get(key(x + dx * cell, y + dy * cell, z + dz * cell));
-            if (!a) continue;
-            for (let k = 0; k < a.length; k += 5) {
-              const d = (a[k] - x) ** 2 + (a[k + 1] - y) ** 2 + (a[k + 2] - z) ** 2;
-              if (d < bd) { bd = d; bidx = a[k + 4]; brv = a[k + 3]; }
+            const a2 = grid.get(key(x + dx * cell, y + dy * cell, z + dz * cell));
+            if (!a2) continue;
+            for (let k = 0; k < a2.length; k += 5) {
+              const d = (a2[k] - x) ** 2 + (a2[k + 1] - y) ** 2 + (a2[k + 2] - z) ** 2;
+              if (d < bd) { bd = d; bidx = a2[k + 4]; brv = a2[k + 3]; }
             }
           }
           src[i] = bidx < 0 ? -1 : bidx + brv * 1e6;
         }
         st.aSrc = src;
         st.mat.uniforms.uRegion.value = 1;
-        st.mat.uniforms.uAmpV.value = 0.028;
+        st.mat.uniforms.uAmpV.value = amp;
         st.mesh.geometry.attributes.aEndo.array.fill(0);
       }
     }
@@ -183,7 +195,7 @@ export class Anatomy {
   }
 
   setActivation(map) {
-    for (const id of ['lca', 'rca', 'coronary_sinus']) {
+    for (const id of ['lca', 'rca', 'coronary_sinus', 'lmca', 'lad', 'diagonal', 'lcx', 'rca_marginal', 'pda', 'posterolateral']) {
       const st = this.structures.get(id);
       if (!st || !st.aSrc) continue;
       const attr = st.mesh.geometry.attributes.aAct;
@@ -237,8 +249,11 @@ export class Anatomy {
       s.mat.uniforms.uGhost.value = g;
       const alpha = g > 0.001 ? (isMuscle ? 0.15 : 0.32) : 1;
       s.mat.uniforms.uAlpha.value = alpha;
-      s.mat.depthWrite = alpha > 0.99;
-      s.mesh.renderOrder = alpha > 0.99 ? 0 : 6;
+      const opaque = alpha > 0.99;
+      if (s.mat.transparent === opaque) { s.mat.transparent = !opaque; s.mat.needsUpdate = true; }
+      s.mat.depthWrite = opaque;
+      s.mat.side = THREE.DoubleSide;   // interior viewing needs the far wall
+      s.mesh.renderOrder = opaque ? 0 : 6;
       s.mat.uniforms.uFade.value = 1;
     }
     this.applyFocus();
@@ -248,6 +263,23 @@ export class Anatomy {
     for (const s of this.structures.values()) {
       const isVessel = s.group === 'vessels' || s.group === 'coronary';
       if (isVessel) this.setVisible(s.id, on);
+    }
+  }
+
+  setInternalVisibility(on) {
+    for (const s of this.structures.values()) {
+      if (s.group === 'cavities' || s.group === 'valves' || s.group === 'internal' || s.id === 'fibrous_skeleton') {
+        this.setVisible(s.id, on);
+      }
+    }
+    // inside the heart the internal apparatus must be fully solid even though
+    // the myocardium around it is translucent
+    for (const s of this.structures.values()) {
+      if (s.group !== 'cavities' && s.group !== 'valves' && s.group !== 'internal' && s.id !== 'fibrous_skeleton') continue;
+      s.mat.uniforms.uGhost.value = 0;
+      s.mat.uniforms.uAlpha.value = 1;
+      s.mat.depthWrite = true;
+      s.mesh.renderOrder = 0;
     }
   }
 

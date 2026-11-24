@@ -14,6 +14,8 @@ export const GROUPS = {
   cavities: { label: 'Cavities', head: ['Surface', 'Volume', 'Relations'] },
   coronary: { label: 'Coronary circulation', head: ['Territory', 'Clinical'] },
   conduction: { label: 'Fibrous skeleton', head: ['Function', 'Clinical'] },
+  veins: { label: 'Cardiac veins', head: ['Course', 'Drainage', 'Clinical'] },
+  internal: { label: 'Internal apparatus', head: ['Position', 'Function', 'Clinical'] },
 };
 
 export const STRUCTURES = {
@@ -243,6 +245,137 @@ export const STRUCTURES = {
       ['Clinical', 'Its ostium is the anatomical anchor for the triangle of Koch and the target for retrograde cardioplegia and for left ventricular pacing leads in cardiac resynchronisation.'],
     ],
   },
+  lmca: {
+    name: 'Left main coronary artery', latin: 'Truncus coronarius sinister', group: 'coronary', fma: 'FMA50040 · FMA3855',
+    lede: 'A short trunk, usually under 15 mm, that divides into the anterior interventricular and circumflex arteries.',
+    sections: [
+      ['Territory', 'Arises from the left sinus of Valsalva and passes between the left auricle and the pulmonary trunk. It supplies the whole left coronary territory through its two daughters — roughly two thirds of left ventricular mass.'],
+      ['Clinical', 'Because it is short, a lesion here is effectively a lesion of two arteries at once. Left main stenosis is the highest-risk coronary anatomy and the reason a left main equivalent is treated as aggressively as a proximal LAD lesion.'],
+    ],
+  },
+  lad: {
+    name: 'Anterior interventricular artery', latin: 'Ramus interventricularis anterior', group: 'coronary', fma: 'FMA3862 · FMA74912',
+    lede: 'The left anterior descending artery: it runs the anterior interventricular groove to the apex and supplies the anterior septum and apex.',
+    sections: [
+      ['Course', 'From the left main it descends in the anterior interventricular sulcus, giving diagonal branches to the anterolateral wall and septal perforators into the septum. In most hearts it rounds the apex and supplies a terminal portion of the inferior wall.'],
+      ['Territory', 'Anterior wall, anterior two thirds of the septum, apex. The septal branches are the reason proximal occlusion produces both anterior infarction and conduction disturbance.'],
+      ['Clinical', 'Proximal LAD occlusion removes the apex and anterior septum together — the classic "widow-maker" lesion. It is the vessel most often responsible for a large anterior ST-elevation infarct and for left ventricular aneurysm formation.'],
+    ],
+  },
+  diagonal: {
+    name: 'Diagonal branch', latin: 'Ramus diagonalis', group: 'coronary', fma: 'FMA3860',
+    lede: 'A lateral branch of the anterior interventricular artery running diagonally across the anterolateral left ventricular wall.',
+    sections: [
+      ['Territory', 'The anterolateral free wall. The number and size of diagonals vary widely; a large first diagonal can supply as much muscle as a small circumflex.'],
+      ['Clinical', 'Occlusion produces an anterolateral infarct that may be electrically silent on a standard 12-lead and only visible in lateral leads V5–V6, I and aVL.'],
+    ],
+  },
+  lcx: {
+    name: 'Circumflex artery', latin: 'Ramus circumflexus', group: 'coronary', fma: 'FMA3895',
+    lede: 'The left atrioventricular groove artery, wrapping the lateral and posterior left ventricle.',
+    sections: [
+      ['Course', 'Leaves the left main, runs in the left atrioventricular groove beneath the left auricle, and gives obtuse marginal branches to the lateral wall. In left-dominant circulation it continues as the posterior descending artery.'],
+      ['Territory', 'Lateral and posterolateral left ventricle; in left dominance, the inferior wall and the atrioventricular node as well.'],
+      ['Clinical', 'Occlusion is often electrically subtle. It is the vessel most commonly injured during mitral valve surgery because it runs immediately beneath the annulus.'],
+    ],
+  },
+  rca: {
+    name: 'Right coronary artery', latin: 'Arteria coronaria dextra', group: 'coronary', fma: 'FMA50039 · FMA3802',
+    lede: 'The right atrioventricular groove artery, supplying the right ventricle and — in most hearts — the inferior wall.',
+    sections: [
+      ['Course', 'From the right sinus of Valsalva it descends in the right atrioventricular groove, gives the right marginal branch at the acute margin, and turns posteriorly at the crux to become the posterior interventricular artery in right-dominant hearts.'],
+      ['Territory', 'Right ventricular free wall, inferior left ventricle in right dominance (~85% of hearts), the sinoatrial node in ~60% and the atrioventricular node in ~90% through its proximal branches.'],
+      ['Clinical', 'Proximal occlusion causes inferior infarction with bradycardia and hypotension disproportionate to infarct size, because it takes the nodal arteries with it. Right ventricular involvement presents with raised JVP and clear lungs.'],
+    ],
+  },
+  rca_marginal: {
+    name: 'Right marginal artery', latin: 'Ramus marginalis dexter', group: 'coronary', fma: 'FMA3818',
+    lede: 'The acute marginal branch, running along the right border of the heart to the inferior right ventricle.',
+    sections: [
+      ['Territory', 'The lateral and inferior right ventricular free wall. It is the main named supply to the right ventricle alongside the conus branch.'],
+      ['Clinical', 'Its preservation matters in right ventricular infarction and in surgery on the right atrium, where it can be divided without obvious immediate consequence.'],
+    ],
+  },
+  pda: {
+    name: 'Posterior interventricular artery', latin: 'Ramus interventricularis posterior', group: 'coronary', fma: 'FMA3840',
+    lede: 'The posterior descending artery, running the posterior interventricular groove to supply the inferior septum and the inferior wall.',
+    sections: [
+      ['Course', 'Arises at the crux of the heart — from the right coronary in right dominance, from the circumflex in left dominance — and descends in the posterior interventricular sulcus, giving septal perforators.'],
+      ['Territory', 'Posterior third of the septum, inferior wall, and the atrioventricular node region.'],
+      ['Clinical', 'Its origin defines dominance. Proximal occlusion produces inferior infarction with posterior extension and a high incidence of AV block.'],
+    ],
+  },
+  posterolateral: {
+    name: 'Posterior ventricular branch', latin: 'Ramus ventriculi posterior', group: 'coronary', fma: 'FMA3837',
+    lede: 'A terminal branch at the crux supplying the posterolateral left ventricular wall.',
+    sections: [
+      ['Territory', 'The posterolateral wall and the basal inferior segment. These branches are the anatomical basis of the posterior leads in a 12-lead ECG.'],
+      ['Clinical', 'Occlusion contributes to posterior infarction, often seen as ST depression in V1–V3 with a tall R wave rather than as ST elevation.'],
+    ],
+  },
+  great_cardiac_vein: {
+    name: 'Great cardiac vein', latin: 'Vena cordis magna', group: 'veins', fma: 'FMA4707',
+    lede: 'The largest cardiac vein, ascending the anterior interventricular groove alongside the LAD before turning into the atrioventricular groove.',
+    sections: [
+      ['Course', 'Begins at the apex, runs with the anterior interventricular artery, then curves left in the atrioventricular groove to become the coronary sinus. It receives the left marginal and posterior veins.'],
+      ['Drainage', 'Drains the anterior left ventricle and much of the left lateral wall — the largest single contribution to coronary sinus flow.'],
+      ['Clinical', 'Its relationship to the circumflex artery at the point where it becomes the coronary sinus (the valve of Vieussens) is a landmark during retrograde cardioplegia and left ventricular lead placement.'],
+    ],
+  },
+  middle_cardiac_vein: {
+    name: 'Middle cardiac vein', latin: 'Vena cordis media', group: 'veins', fma: 'FMA4713',
+    lede: 'The posterior interventricular vein, ascending the posterior groove from the apex with the posterior descending artery.',
+    sections: [
+      ['Course', 'Runs in the posterior interventricular sulcus from the apex to the crux, where it enters the coronary sinus near its ostium.'],
+      ['Drainage', 'Drains the inferior septum and the inferior ventricular walls.'],
+      ['Clinical', 'Its proximity to the posterior descending artery means the two are injured together in posterior infarction and are both at risk in posterior ventricular pacing.'],
+    ],
+  },
+  small_cardiac_vein: {
+    name: 'Small cardiac vein', latin: 'Vena cordis parva', group: 'veins', fma: 'FMA4714',
+    lede: 'A right-sided vein running the right atrioventricular groove with the right coronary artery.',
+    sections: [
+      ['Course', 'Passes from the acute margin along the right atrioventricular groove to drain into the coronary sinus near its atrial end; it may instead open directly into the right atrium.'],
+      ['Drainage', 'Drains the right ventricular free wall and the right atrium.'],
+      ['Clinical', 'Its variable termination is one reason right atrial pacing leads can enter the coronary venous system unexpectedly.'],
+    ],
+  },
+  pm_rv_ant: {
+    name: 'Anterior papillary muscle (right)', latin: 'Musculus papillaris anterior ventriculi dextri', group: 'internal', fma: 'FMA7260',
+    lede: 'The largest of the three right ventricular papillary muscles, arising from the anterior wall and anchoring the anterior tricuspid leaflet.',
+    sections: [
+      ['Position', 'Arises from the anterior ventricular wall and receives chordae from the anterior and posterior tricuspid leaflets. The moderator band usually runs from the septum to its base.'],
+      ['Function', 'Contracts during systole to hold the tricuspid leaflets in apposition against ventricular pressure.'],
+      ['Clinical', 'Its position is why right ventricular leads and biopsy forceps are directed at the septum rather than the free wall — perforation here is a recognised complication.'],
+    ],
+  },
+  pm_rv_post: {
+    name: 'Posterior papillary muscle (right)', latin: 'Musculus papillaris posterior ventriculi dextri', group: 'internal', fma: 'FMA7261',
+    lede: 'The smallest and most variable of the right ventricular papillary muscles.',
+    sections: [
+      ['Position', 'Arises from the inferior wall of the right ventricle; may be split into several slips.'],
+      ['Function', 'Anchors the posterior tricuspid leaflet through chordae tendineae.'],
+      ['Clinical', 'Its variability explains why tricuspid regurgitation after right ventricular infarction is unpredictable.'],
+    ],
+  },
+  pm_rv_septal: {
+    name: 'Septal papillary muscle (right)', latin: 'Musculus papillaris septalis ventriculi dextri', group: 'internal', fma: 'FMA7262',
+    lede: 'The septal papillary muscle, attached to the interventricular septum and often the smallest of the three.',
+    sections: [
+      ['Position', 'Rises from the septal wall of the right ventricle, close to the septomarginal trabecula.'],
+      ['Function', 'Tethers the septal tricuspid leaflet; because the leaflet is fixed to the septum, septal leaflet displacement is the echo sign used to separate tricuspid from mitral regurgitation.'],
+      ['Clinical', 'Its septal attachment means septal infarction can produce tricuspid regurgitation without any leaflet disease.'],
+    ],
+  },
+  pm_lv: {
+    name: 'Papillary muscles (left)', latin: 'Musculi papillares ventriculi sinistri', group: 'internal', fma: 'FMA9352 · FMA7264',
+    lede: 'Two stout muscles, anterolateral and posteromedial, that anchor the mitral leaflets and are as thick as the ventricular wall.',
+    sections: [
+      ['Position', 'The anterolateral muscle rises from the lateral wall, the posteromedial from the inferior wall. Each gives chordae to both mitral leaflets.'],
+      ['Function', 'Shorten during systole, taking up chordal slack while the leaflets coapt. They do not actively pull the valve open — relaxation and annular recoil do that.'],
+      ['Clinical', 'Posteromedial rupture after inferior infarction causes acute, severe mitral regurgitation. Displacement of the papillary muscle by a dilated ventricle produces functional regurgitation with an apparently normal valve.'],
+    ],
+  },
   fibrous_skeleton: {
     name: 'Fibrous skeleton', latin: 'Skeleton fibrosum cordis', group: 'conduction', fma: 'FMA9496',
     lede: 'A ring of dense collagen between the atria and ventricles — the reason the heart beats in sequence rather than all at once.',
@@ -254,9 +387,10 @@ export const STRUCTURES = {
 };
 
 export const ORDER = [
-  'ra', 'rv', 'la', 'lv', 'aorta', 'pulmonary_trunk', 'rpa', 'lpa', 'svc', 'ivc',
+  'ra', 'rv', 'la', 'lv', 'lmca', 'lad', 'diagonal', 'lcx', 'rca', 'rca_marginal', 'pda', 'posterolateral',
+  'great_cardiac_vein', 'middle_cardiac_vein', 'small_cardiac_vein', 'aorta', 'pulmonary_trunk', 'rpa', 'lpa', 'svc', 'ivc',
   'pv_rspv', 'pv_ripv', 'pv_lspv', 'pv_lipv', 'tv', 'mv', 'av', 'pvv',
-  'cav_ra', 'cav_rv', 'cav_la', 'cav_lv', 'lca', 'rca', 'coronary_sinus', 'fibrous_skeleton',
+  'cav_ra', 'cav_rv', 'cav_la', 'cav_lv', 'pm_lv', 'pm_rv_ant', 'pm_rv_post', 'pm_rv_septal', 'coronary_sinus', 'fibrous_skeleton',
 ];
 
 /* ------------------------------------------------------------------ *

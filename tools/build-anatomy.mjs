@@ -58,10 +58,26 @@ const STRUCTURES = [
   { id: 'cav_rv', label: 'Right ventricular cavity', fma: ['FMA9291'], group: 'cavities', smooth: 4, color: '#25415c', solid: true },
   { id: 'cav_la', label: 'Left atrial cavity', fma: ['FMA9465'], group: 'cavities', smooth: 4, color: '#3a2b52', solid: true },
   { id: 'cav_lv', label: 'Left ventricular cavity', fma: ['FMA9466'], group: 'cavities', smooth: 4, color: '#3a2b52', solid: true },
-  { id: 'lca', label: 'Left coronary artery', fma: ['FMA50040', 'FMA3862', 'FMA3895'], group: 'coronary', smooth: 2, color: '#c25a4a' },
-  { id: 'rca', label: 'Right coronary artery', fma: ['FMA50039'], group: 'coronary', smooth: 2, color: '#c25a4a' },
-  { id: 'coronary_sinus', label: 'Coronary sinus', fma: ['FMA4706'], group: 'coronary', smooth: 2, color: '#6b6ea8' },
-  { id: 'fibrous_skeleton', label: 'Fibrous skeleton', fma: ['FMA9496'], group: 'conduction', smooth: 2, color: '#d8cfae' },
+  // ---- coronary arteries, one mesh per named branch -------------------
+  { id: 'lmca', label: 'Left main coronary artery', fma: ['FMA50040', 'FMA3855'],  group: 'coronary', surfaceBound: true, smooth: 2, color: '#c05a48' },
+  { id: 'lad', label: 'Anterior interventricular artery', fma: ['FMA3862', 'FMA74912', 'FMA3868', 'FMA3872', 'FMA3874', 'FMA3876'],  group: 'coronary', surfaceBound: true, smooth: 2, color: '#c65f4a' },
+  { id: 'diagonal', label: 'Diagonal branch', fma: ['FMA3860'],  group: 'coronary', surfaceBound: true, smooth: 2, color: '#bf5b46' },
+  { id: 'lcx', label: 'Circumflex artery', fma: ['FMA3895'],  group: 'coronary', surfaceBound: true, smooth: 2, color: '#c65f4a' },
+  { id: 'rca', label: 'Right coronary artery', fma: ['FMA50039', 'FMA3802', 'FMA3815'],  group: 'coronary', surfaceBound: true, smooth: 2, color: '#c05a48' },
+  { id: 'rca_marginal', label: 'Right marginal artery', fma: ['FMA3818'],  group: 'coronary', surfaceBound: true, smooth: 2, color: '#bf5b46' },
+  { id: 'pda', label: 'Posterior interventricular artery', fma: ['FMA3840'],  group: 'coronary', surfaceBound: true, smooth: 2, color: '#c05a48' },
+  { id: 'posterolateral', label: 'Posterior ventricular branch', fma: ['FMA3837'],  group: 'coronary', surfaceBound: true, smooth: 2, color: '#bf5b46' },
+  // ---- cardiac veins ------------------------------------------------
+  { id: 'great_cardiac_vein', label: 'Great cardiac vein', fma: ['FMA4707'],  group: 'veins', surfaceBound: true, smooth: 2, color: '#59618f' },
+  { id: 'middle_cardiac_vein', label: 'Middle cardiac vein', fma: ['FMA4713'],  group: 'veins', surfaceBound: true, smooth: 2, color: '#59618f' },
+  { id: 'small_cardiac_vein', label: 'Small cardiac vein', fma: ['FMA4714'],  group: 'veins', surfaceBound: true, smooth: 2, color: '#59618f' },
+  { id: 'coronary_sinus', label: 'Coronary sinus', fma: ['FMA4706'],  group: 'veins', surfaceBound: true, smooth: 2, color: '#6b6ea8' },
+  // ---- internal: papillary apparatus --------------------------------
+  { id: 'pm_rv_ant', label: 'Anterior papillary muscle (right)', fma: ['FMA7260'], group: 'internal', smooth: 2, color: '#8a3b3f' },
+  { id: 'pm_rv_post', label: 'Posterior papillary muscle (right)', fma: ['FMA7261'], group: 'internal', smooth: 2, color: '#8a3b3f' },
+  { id: 'pm_rv_septal', label: 'Septal papillary muscle (right)', fma: ['FMA7262'], group: 'internal', smooth: 2, color: '#8a3b3f' },
+  { id: 'pm_lv', label: 'Papillary muscles (left)', fma: ['FMA9352', 'FMA7264', 'FMA7265'], group: 'internal', smooth: 2, color: '#91474b' },
+  // ---- arch branches -------------------------------------------------
 ];
 
 /* ------------------------------------------------------------------ *
@@ -623,6 +639,12 @@ function writeGlb(structures, outFile) {
     const idxBV = addBufferView(idx, 34963);
     json.accessors.push({ bufferView: posBV, componentType: 5126, count: n, type: 'VEC3', min: mn, max: mx });
     const posAcc = json.accessors.length - 1;
+    const extra = {};
+    for (const [name, data] of Object.entries(s.attrs || {})) {
+      const bv = addBufferView(Float32Array.from(data), 34962);
+      json.accessors.push({ bufferView: bv, componentType: 5126, count: data.length, type: 'SCALAR' });
+      extra[name] = json.accessors.length - 1;
+    }
     json.accessors.push({ bufferView: idxBV, componentType: useShort ? 5123 : 5125, count: idx.length, type: 'SCALAR' });
     const idxAcc = json.accessors.length - 1;
     const mat = s.material;
@@ -637,7 +659,7 @@ function writeGlb(structures, outFile) {
     });
     json.meshes.push({
       name: s.id,
-      primitives: [{ attributes: { POSITION: posAcc }, indices: idxAcc, material: json.materials.length - 1 }],
+      primitives: [{ attributes: { POSITION: posAcc, ...extra }, indices: idxAcc, material: json.materials.length - 1 }],
     });
     json.nodes.push({ name: s.id, mesh: json.meshes.length - 1, extras: { group: s.group } });
     json.scenes[0].nodes.push(json.nodes.length - 1);
@@ -677,6 +699,7 @@ const toThree = (x, y, z) => [x - CX, z - CZ, -(y - CY)];
 let CX = 0, CY = 0, CZ = 0, SCALE = 1;
 
 const built = [];
+const finalByRef = {};
 const meta = { structures: [], scale: 1, units: 'normalised (heart height = 1.0)', source: 'BodyParts3D 4.0' };
 
 // First pass: raw merge to establish the reference frame from the four chambers.
@@ -695,7 +718,7 @@ const frameGeom = mergeFiles(rawChambers.map((id) => path.join(OBJ_DIR, `${id}.o
 
 const final = [];
 for (const s of STRUCTURES) {
-  const ids = s.fma.flatMap((f) => map.get(f) || []);
+  const ids = [...new Set(s.fma.flatMap((f) => map.get(f) || []))];
   if (!ids.length) { console.warn('missing', s.id); continue; }
   const files = ids.map((id) => path.join(OBJ_DIR, `${id}.obj`)).filter((f) => fs.existsSync(f));
   let geom = mergeFiles(files, 0.02);
@@ -738,6 +761,7 @@ for (const s of STRUCTURES) {
   const color = [parseInt(hex.slice(0, 2), 16) / 255, parseInt(hex.slice(2, 4), 16) / 255, parseInt(hex.slice(4, 6), 16) / 255, 1];
   const entry = { ...s, positions, normals: toN, indices, material: { color } };
   built.push(entry);
+  finalByRef[s.id] = { positions, indices };
   final.push({ id: s.id, positions, indices });
   const st = meta.structures.length;
   meta.structures[st] = { id: s.id, label: s.label, group: s.group, triangles: indices.length / 3, vertices: positions.length / 3 };
@@ -808,6 +832,55 @@ for (const m of meta.structures) {
   m.maxR = +maxR.toFixed(4);
   m.center = [+cx.toFixed(4), +cy.toFixed(4), +cz.toFixed(4)];
   m.radius = +rad.toFixed(4);
+}
+
+// ------------------------------------------------------------------
+// Sulci. The atrioventricular and interventricular grooves are where the
+// coronary arteries and the great cardiac vein physically run. Rather than
+// painting lines, measure each chamber vertex against the real vessel geometry
+// and store a smooth mask that the shader uses both to recess the surface and
+// to tint the epicardial fat that fills the groove.
+// ------------------------------------------------------------------
+{
+  const witnesses = ['rca', 'lcx', 'lad', 'pda', 'great_cardiac_vein', 'coronary_sinus'];
+  const pts = [];
+  for (const id of witnesses) {
+    const r = final.find((x) => x.id === id);
+    if (!r) continue;
+    for (let i = 0; i < r.positions.length; i += 3) pts.push(r.positions[i], r.positions[i + 1], r.positions[i + 2]);
+  }
+  const cell = 0.02;
+  const key = (x, y, z) => `${Math.floor(x / cell)},${Math.floor(y / cell)},${Math.floor(z / cell)}`;
+  const grid = new Map();
+  for (let i = 0; i < pts.length; i += 3) {
+    const k = key(pts[i], pts[i + 1], pts[i + 2]);
+    let a = grid.get(k);
+    if (!a) { a = []; grid.set(k, a); }
+    a.push(pts[i], pts[i + 1], pts[i + 2]);
+  }
+  const smooth = (t) => t <= 0 ? 0 : t >= 1 ? 1 : t * t * (3 - 2 * t);
+  for (const st of built) {
+    const isChamber = ['ra', 'rv', 'la', 'lv'].includes(st.id);
+    const arr = new Float32Array(st.positions.length / 3);
+    if (isChamber) {
+      for (let i = 0; i < arr.length; i++) {
+        const x = st.positions[i * 3], y = st.positions[i * 3 + 1], z = st.positions[i * 3 + 2];
+        let best = Infinity;
+        for (let dx = -2; dx <= 2; dx++) for (let dy = -2; dy <= 2; dy++) for (let dz = -2; dz <= 2; dz++) {
+          const a = grid.get(key(x + dx * cell, y + dy * cell, z + dz * cell));
+          if (!a) continue;
+          for (let k = 0; k < a.length; k += 3) {
+            const d = (a[k] - x) ** 2 + (a[k + 1] - y) ** 2 + (a[k + 2] - z) ** 2;
+            if (d < best) best = d;
+          }
+        }
+        if (!isFinite(best)) { arr[i] = 0; continue; }
+        const d = Math.sqrt(best);
+        arr[i] = 1 - smooth((d - 0.006) / (0.030 - 0.006));
+      }
+    }
+    st.attrs = { aGroove: arr };
+  }
 }
 
 fs.mkdirSync(OUT_DIR, { recursive: true });

@@ -15,6 +15,7 @@ import * as THREE from 'three';
 const vert = /* glsl */ `
   attribute float aAct;
   attribute float aEndo;
+  attribute float aGroove;
 
   uniform float uVT;       // seconds since ventricular activation onset
   uniform float uAT;       // seconds since atrial activation onset
@@ -24,12 +25,14 @@ const vert = /* glsl */ `
   uniform float uBaseY;
   uniform float uSpanY;
   uniform float uTwist;
+  uniform float uGrooveDepth;
 
   varying vec3 vN;
   varying vec3 vW;
   varying float vAct;
   varying float vDt;
   varying float vEndo;
+  varying float vGroove;
 
   // Mechanical twitch: tension rises over ~60 ms, peaks near end-systole and
   // relaxes over ~300 ms. The earlier 13 ms rise peaked almost immediately
@@ -65,7 +68,10 @@ const vert = /* glsl */ `
       p.y += (uBaseY - p.y) * 0.030 * tw;
     }
 
-    p += n * d;
+    // sulci are genuine surface topography: the wall is recessed where the
+    // coronary arteries and great cardiac vein run
+    p += n * d - n * (uGrooveDepth * aGroove);
+    vGroove = aGroove;
     vDt = tAct;
     vAct = aAct;
     vEndo = aEndo;
@@ -104,6 +110,7 @@ const frag = /* glsl */ `
   varying float vAct;
   varying float vDt;
   varying float vEndo;
+  varying float vGroove;
 
   float hash(vec3 p) {
     p = fract(p * 0.3183099 + vec3(0.1, 0.2, 0.3));
@@ -151,6 +158,8 @@ const frag = /* glsl */ `
     float grain = 0.93 + 0.14 * n1 + 0.06 * n2;
     vec3 albedo = mix(uBase, uDeep, clamp(n1 * 1.15 - 0.1, 0.0, 1.0) * 0.55) * grain;
     if (vEndo > 0.5) albedo = mix(albedo, uDeep * 1.25, 0.34);   // endocardium
+    // epicardial fat sitting in the atrioventricular and interventricular grooves
+    albedo = mix(albedo, vec3(0.52, 0.38, 0.22), vGroove * 0.55);
 
     // ---- light -----------------------------------------------------------
     vec3 L1 = normalize(uKeyDir);
@@ -225,7 +234,7 @@ export function makeTissueMaterial(opts) {
     vertexShader: vert,
     fragmentShader: frag,
     side: THREE.DoubleSide,
-    transparent: true,
+    transparent: false,
     depthWrite: true,
     uniforms: {
       uBase: { value: new THREE.Color(opts.base) },
@@ -248,6 +257,7 @@ export function makeTissueMaterial(opts) {
       uBaseY: { value: opts.baseY ?? 0.3 },
       uSpanY: { value: opts.spanY ?? 0.6 },
       uTwist: { value: opts.twist ?? 0.05 },
+      uGrooveDepth: { value: opts.groove ?? 0.010 },
       uKeyDir: { value: KEY },
       uRimDir: { value: RIM },
       uHead: { value: 0 },
@@ -265,6 +275,8 @@ export const TISSUE_PALETTE = {
   valves: { base: '#b6a488', deep: '#6d6150', act: '#f2d9a8', region: 3, rough: 0.38, spec: 0.85 },
   cavities: { base: '#4a1d22', deep: '#21080c', act: '#f2c483', region: 1, rough: 0.7, spec: 0.3 },
   coronary: { base: '#8d3a33', deep: '#4a1614', act: '#f0b070', region: 1, rough: 0.45, spec: 0.6 },
+  veins: { base: '#3c4460', deep: '#1a1f30', act: '#8fa8d0', region: 4, rough: 0.5, spec: 0.5 },
+  internal: { base: '#7d3237', deep: '#381114', act: '#f0b070', region: 1, rough: 0.62, spec: 0.4 },
   shell: { base: '#6a2a2c', deep: '#3a1013', act: '#f2c483', region: 4, rough: 0.6, spec: 0.5 },
   conduction: { base: '#a89b7d', deep: '#5f5847', act: '#f2d9a8', region: 4, rough: 0.5, spec: 0.5 },
 };

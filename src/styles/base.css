@@ -415,6 +415,30 @@ button { font: inherit; color: inherit; background: none; border: 0; padding: 0;
 @keyframes rise { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: none; } }
 @keyframes bloom { from { opacity: 0; transform: translateY(14px); filter: blur(6px); } to { opacity: 1; transform: none; filter: none; } }
 
+/* ---------------- interior bar ---------------- */
+#interior-bar {
+  position: absolute; z-index: 10; left: 50%; bottom: calc(var(--band-h) + 16px);
+  transform: translate(-50%, 10px); opacity: 0; pointer-events: none;
+  display: flex; align-items: center; gap: 16px;
+  padding: 7px 14px; border: 1px solid var(--hair);
+  background: rgba(8, 9, 10, 0.82); backdrop-filter: blur(8px);
+  transition: opacity 320ms var(--ease), transform 380ms var(--ease-out);
+  max-width: calc(100vw - 32px); flex-wrap: wrap; justify-content: center;
+}
+#interior-bar.on { opacity: 1; pointer-events: auto; transform: translate(-50%, 0); }
+.ib-label {
+  font-family: var(--mono); font-size: 8.5px; letter-spacing: 0.18em;
+  text-transform: uppercase; color: var(--ink-3);
+}
+.ib-btn {
+  font-family: var(--sans); font-size: 11px; letter-spacing: 0.04em;
+  color: var(--ink-3); padding: 3px 0; border-bottom: 1px solid transparent;
+  transition: color 200ms, border-color 200ms;
+}
+.ib-btn:hover { color: var(--ink); }
+.ib-btn.on { color: var(--sand); border-color: rgba(216,181,145,.45); }
+.ib-exit { font-family: var(--mono); font-size: 9px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--ink-3); margin-left: 4px; }
+
 /* ---------------- toast ---------------- */
 #toast {
   position: absolute; left: 50%; bottom: calc(var(--band-h) + 18px); transform: translate(-50%, 8px);
@@ -531,6 +555,8 @@ button { font: inherit; color: inherit; background: none; border: 0; padding: 0;
   #stim-readout .sr-v { font-size: 22px; }
   #index-drawer { left: 0; top: 90px; width: 78vw; max-height: 46vh; padding-left: 16px; }
   #toast { bottom: calc(var(--band-h) + 52px); font-size: 8.5px; }
+  #interior-bar { bottom: calc(var(--band-h) + 8px); gap: 10px; padding: 6px 10px; }
+  .ib-btn { font-size: 10px; }
   .open-title .l2 { font-size: clamp(30px, 9vw, 44px); }
   .open-actions { flex-direction: column; gap: 14px; }
 }
