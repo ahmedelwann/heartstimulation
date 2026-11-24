@@ -1,0 +1,118 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<meta name="theme-color" content="#08090a" />
+<title>Ahmed R. Elwan — Heart Stimulation</title>
+<meta name="description" content="An interactive anatomical specimen of the human heart: pace the myocardium, watch the activation wavefront, and read the electrocardiogram it produces." />
+<meta property="og:title" content="Ahmed R. Elwan — Heart Stimulation" />
+<meta property="og:description" content="An interactive anatomical specimen of the human heart." />
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' fill='%2308090a'/%3E%3Cpath d='M6 17h5l2-6 3 12 3-9 2 3h5' fill='none' stroke='%23d9b48f' stroke-width='1.6'/%3E%3C/svg%3E" />
+</head>
+<body>
+<div id="app" aria-live="off">
+
+  <!-- ============ STAGE ============ -->
+  <div id="stage">
+    <canvas id="gl"></canvas>
+    <div id="label-field" aria-hidden="true"></div>
+    <div id="reticle" aria-hidden="true"></div>
+  </div>
+
+  <!-- ============ IDENTITY ============ -->
+  <header id="identity">
+    <div class="ident-name">Ahmed R. Elwan</div>
+    <h1 class="ident-title">Heart<br />Stimulation</h1>
+    <div class="ident-sub">
+      <span>Interactive anatomical specimen</span>
+      <span class="dot"></span>
+      <span>Edition I</span>
+    </div>
+  </header>
+
+  <!-- ============ CHAPTER SPINE ============ -->
+  <nav id="spine" aria-label="Exploration modes">
+    <span class="spine-rule" aria-hidden="true"></span>
+    <ol id="spine-list"></ol>
+    <span class="spine-rule" aria-hidden="true"></span>
+  </nav>
+
+  <!-- ============ CONTEXT PANEL ============ -->
+  <aside id="panel" aria-live="polite" hidden></aside>
+
+  <!-- ============ INSTRUMENT BAND ============ -->
+  <section id="band" aria-label="Cardiac instrument">
+    <div class="band-monitor">
+      <div class="monitor-head">
+        <span class="mono-label">Lead II</span>
+        <span class="mono-dim" id="mon-lead-sub">derived</span>
+        <span class="monitor-axis" id="axis-wrap">
+          <svg viewBox="0 0 100 100" class="axis-dial" aria-hidden="true"><g id="axis-g"></g></svg>
+          <span class="axis-val mono" id="axis-val">—</span>
+        </span>
+      </div>
+      <canvas id="ecg" width="720" height="150"></canvas>
+      <div class="monitor-values">
+        <div><b class="mono" id="v-hr">—</b><span>min⁻¹</span></div>
+        <div><b class="mono" id="v-qrs">—</b><span>QRS ms</span></div>
+        <div><b class="mono" id="v-qt">—</b><span>QT ms</span></div>
+        <div><b class="mono" id="v-sv">—</b><span>SV mL</span></div>
+      </div>
+    </div>
+
+    <div class="band-cycle">
+      <div class="cycle-head">
+        <span class="mono-label" id="cycle-phase">—</span>
+        <span class="cycle-hint">drag the cycle to scrub time</span>
+      </div>
+      <div id="rail" role="slider" tabindex="0" aria-label="Cardiac cycle position" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0">
+        <div class="rail-track" id="rail-track"></div>
+        <div class="rail-playhead" id="rail-head"></div>
+      </div>
+      <div class="cycle-foot">
+        <div class="rate">
+          <button class="step" id="hr-down" aria-label="Decrease heart rate">−</button>
+          <span class="rate-val mono" id="hr-val">60</span>
+          <span class="rate-unit">bpm</span>
+          <button class="step" id="hr-up" aria-label="Increase heart rate">+</button>
+        </div>
+        <div class="cycle-toggles">
+          <button class="txt-btn" id="toggle-thing" aria-pressed="false">Ghost muscle</button>
+          <button class="txt-btn" id="toggle-labels" aria-pressed="false">Labels</button>
+          <button class="txt-btn" id="toggle-sound" aria-pressed="false">Sound</button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ MODE TOOLS ============ -->
+  <div id="tools"></div>
+
+  <!-- ============ OPENING ============ -->
+  <div id="opening">
+    <div class="open-inner">
+      <div class="open-eyebrow mono">Anatomical study · 2026</div>
+      <div class="open-title">
+        <span class="l1">Ahmed R. Elwan</span>
+        <span class="l2">Heart Stimulation</span>
+      </div>
+      <p class="open-line">A specimen you can pace.</p>
+      <div class="open-progress"><span></span></div>
+      <div class="open-actions">
+        <button id="enter" class="enter">Enter the specimen</button>
+        <button id="skip" class="skip">Skip</button>
+      </div>
+    </div>
+    <div class="open-foot mono">
+      <span id="load-status">Preparing specimen</span>
+      <span id="load-pct">0%</span>
+    </div>
+  </div>
+
+  <div id="imprint" hidden></div>
+  <div id="toast" role="status"></div>
+</div>
+<script type="module" src="/src/main.js"></script>
+</body>
+</html>

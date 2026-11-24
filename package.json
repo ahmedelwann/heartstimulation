@@ -1,0 +1,23 @@
+{
+  "name": "heart-stimulation",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Ahmed R. Elwan \u2014 Heart Stimulation. An interactive anatomical specimen of the human heart.",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview"
+  },
+  "dependencies": {
+    "three": "^0.180.0"
+  },
+  "devDependencies": {
+    "vite": "^7.3.8"
+  },
+  "engines": {
+    "node": ">=18"
+  },
+  "license": "MIT",
+  "author": "Ahmed R. Elwan"
+}
